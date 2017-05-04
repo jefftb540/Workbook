@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import url, include
 from rest_framework import routers
 from django.contrib import admin
-from servico.views import ListServicos, ListServicosPorPrestador, GetServico, ListUsuarios, GetUsuario, GetRequestUser, ListCategorias, GetCategoria, ListSubCategorias, GetSubCategoria, ListSolicitacoes, GetSolicitacao, AddSolicitacao, AddOrcamento,ListOrcamentos, GetOrcamento, GetAvaliacoesServico, AddAvaliacao, login
+from servico.views import ListServicos, ListServicosPorPrestador, GetServico, ListUsuarios, GetUsuario, GetRequestUser, ListCategorias, GetCategoria, ListSubCategorias, GetSubCategoria, ListSolicitacoes, GetSolicitacao, AddSolicitacao, AddOrcamento, UpdateOrcamento,ListOrcamentos, GetOrcamento, GetAvaliacoesServico, AddAvaliacao, login
 
 router = routers.SimpleRouter()
 
@@ -46,6 +46,7 @@ urlpatterns = [
     url(r'^orcamentos/all', ListOrcamentos.as_view()),
     url(r'^orcamentos/(\d+)$', GetOrcamento.as_view()),
     url(r'^servicos/orcamento/criar', AddOrcamento.as_view()),
+     url(r'^servicos/orcamento/atualizar', UpdateOrcamento.as_view()),
 
 
 ]

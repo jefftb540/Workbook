@@ -46,7 +46,18 @@ class AvaliacaoSerializer(serializers.ModelSerializer):
 
 class OrcamentoSerializer(serializers.ModelSerializer):
 	solicitacao = serializers.PrimaryKeyRelatedField(queryset=Solicitacao.objects.all())
+	servicos_atendidos = serializers.PrimaryKeyRelatedField(many=True, queryset=Servico.objects.all())
+	data_atendimento = serializers.DateTimeField(format="%d/%m/%Y")
 
+	class Meta:
+		model = Orcamento
+		fields = '__all__'
+
+class OrcamentoSerializerGet(serializers.ModelSerializer):
+	solicitacao = serializers.PrimaryKeyRelatedField(queryset=Solicitacao.objects.all())
+	servicos_atendidos = ServicoSerializer(many=True, read_only=True)
+	data_atendimento = serializers.DateTimeField(format="%d/%m/%Y", read_only=True)
+	
 	class Meta:
 		model = Orcamento
 		fields = '__all__'

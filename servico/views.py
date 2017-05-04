@@ -11,7 +11,7 @@ from django.contrib.auth.views import login
 from . import models
 from . import serializers
 from models import Servico, Usuario, Avaliacao, Solicitacao, Orcamento
-from serializers import ServicoSerializer, UsuarioSerializer, AvaliacaoSerializer, SolicitacaoSerializer, SolicitacaoSerializerGet, OrcamentoSerializer
+from serializers import ServicoSerializer, UsuarioSerializer, AvaliacaoSerializer, SolicitacaoSerializer, SolicitacaoSerializerGet, OrcamentoSerializer, OrcamentoSerializerGet
 from oauth2_provider.views.generic import ProtectedResourceView
 from django.forms.models import modelform_factory
 
@@ -153,17 +153,31 @@ class GetSolicitacao(APIView):
 		response = SolicitacaoSerializerGet(solicitacao)
 		return Response(response.data)
 
+class UpdateOrcamento(APIView):
+	def post(self, request, format=None):
+		instance = Orcamento.objects.get(pk=request.data.get('id'))
+		orcamento = OrcamentoSerializerGet(instance=instance, data=request.data)
+		print instance
+		#print vars(request.POST.get(["nota"]))
+		if orcamento.is_valid():
+			print "válido"
+			OrcamentoSerializerGet.save(orcamento) 		
+		else:
+			print orcamento.errors
+
+		return Response(orcamento.data)
+
 class AddOrcamento(APIView):
 	def post(self, request, format=None):
-		instance = OrcamentoSerializer(data=request.data)
+		orcamento = OrcamentoSerializer(data=request.data)
 		#print vars(request.POST.get(["nota"]))
-		if instance.is_valid():
+		if orcamento.is_valid():
 			print "válido"
-			OrcamentoSerializer.save(instance) 		
+			OrcamentoSerializer.save(orcamento) 		
 		else:
-			print instance.errors
+			print orcamento.errors
 
-		return Response(instance.data)
+		return Response(orcamento.data)
 
 #aplicar a logica de negócios para pegar somente os orçamentos para o prestador
 class ListOrcamentos(APIView):
@@ -171,7 +185,7 @@ class ListOrcamentos(APIView):
 
 	def get(self, request, format=None):
 		orcamentos = Orcamento.objects.filter(orcamento__solicitacao__servico__usuario = request.user)
-		response = OrcamentoSerializer(orcamentos, many=True)
+		response = OrcamentoSerializerGet(orcamentos, many=True)
 		return Response(response.data)
 
 class GetOrcamento(APIView):
@@ -179,7 +193,7 @@ class GetOrcamento(APIView):
 
 	def get(self, request, format=None):
 		orcamento = Orcamento.objects.get(pk=self.args[0])
-		response = OrcamentoSerializer(orcamento)
+		response = OrcamentoSerializerGet(orcamento)
 		return Response(response.data)
 
 
