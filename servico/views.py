@@ -161,7 +161,7 @@ class AddOrcamento(APIView):
 			print "válido"
 			OrcamentoSerializer.save(instance) 		
 		else:
-			print "invalido"
+			print instance.errors
 
 		return Response(instance.data)
 

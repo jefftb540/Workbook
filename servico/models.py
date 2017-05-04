@@ -111,10 +111,11 @@ class Orcamento(models.Model):
 	"""docstring for Orcamento"""
 	solicitacao = models.ForeignKey(Solicitacao)
 	valor = models.IntegerField(blank=True)
-	descricao = models.CharField(max_length=1000)
+	descricao = models.CharField(max_length=1000, default="")
 	validade = models.DateTimeField(null=True)
 	#data e hora de atendimento
 	data_atendimento = models.DateTimeField(null=True)
+	servicos_atendidos = models.ManyToManyField(Servico)
 	#status (cancelado, pedente, confirmado, concluido, avaliado)
 	status = models.CharField(max_length=10,default="pendente", choices=[['cancelado','Cancelado'],['pendente','Pendente'],['confirmado','Confirmado'], ['concluido','Concluido'], ['avaliado', 'Avaliado']])
 

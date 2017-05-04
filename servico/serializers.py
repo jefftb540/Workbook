@@ -62,7 +62,7 @@ class SolicitacaoSerializer(serializers.ModelSerializer):
 
 class SolicitacaoSerializerGet(serializers.ModelSerializer):
 	usuario = serializers.StringRelatedField()
-	servico = serializers.StringRelatedField(many=True)
+	servico = ServicoSerializer(many=True, read_only=True)
 	data_inicio = serializers.DateTimeField(format="%d/%m/%Y")
 	data_fim = serializers.DateTimeField(format="%d/%m/%Y")
 
