@@ -25,7 +25,7 @@ SECRET_KEY = 'n#%t%t0j%n9&0%kvwg0wj$gmu5h0+@z028$)zrbgy0)ku@px!*'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["10.0.0.104"]
 
 
 # Application deu9j5 finition
@@ -126,7 +126,7 @@ CORS_ORIGIN_ALLOWED_METHODS = "POST, OPTIONS, GET"
 CORS_ORIGIN_ALLOWED_HEADERS = "*"
 
 CORS_ORIGIN_WHITELIST = (
-    'localhost',
+    'HTTP://localhost',
 )
 
 
@@ -135,7 +135,9 @@ CORS_ORIGIN_WHITELIST = (
 
 LANGUAGE_CODE = 'en-us'
 
-DATETIME_FORMAT = ('%d-%m-%Y','%Y-%m-%d')
+DATETIME_INPUT_FORMAT = ('%d-%m-%Y','%Y-%m-%d')
+DATETIME_FORMAT = ('%d/%m/%y %H:%M')
+SHORT_DATETIME_FORMAT = ('%d/%m/%y %H:%M')
 
 TIME_ZONE = 'UTC'
 
@@ -150,3 +152,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+MEDIA_ROOT = '/var/www/html/images'
+MEDIA_URL = '/images/'

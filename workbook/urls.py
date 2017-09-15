@@ -14,9 +14,11 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
+from django.conf.urls.static import static
+from django.conf import settings
 from rest_framework import routers
 from django.contrib import admin
-from servico.views import ListServicos, ListServicosPorPrestador, GetServico, ListUsuarios, GetUsuario, GetRequestUser, ListCategorias, GetCategoria, ListSubCategorias, GetSubCategoria, ListSolicitacoes, GetSolicitacao, AddSolicitacao, AddOrcamento, UpdateOrcamento,ListOrcamentos, GetOrcamento, GetAvaliacoesServico, AddAvaliacao, login
+from servico.views import CountNotificacoes, LerNotificacao, SaveServico, UpdateServico, DeleteServico, ListServicos, ListServicosPorPrestador, GetServico, ListUsuarios, SearchUsuarios, GetUsuario, GetRequestUser, ListCategorias, GetCategoria, ListSubCategorias, GetSubCategoria, ListSolicitacoes, GetSolicitacao, AddSolicitacao, UpdateSolicitacao, AddOrcamento, UpdateOrcamento,ListOrcamentos, GetOrcamento, GetAvaliacoesUsuario, AddAvaliacao, login, AddMensagem, ListMensagens
 
 router = routers.SimpleRouter()
 
@@ -29,10 +31,14 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^login', login),
     url(r'^servicos/all', ListServicos.as_view()),
+    url(r'^servicos/save', SaveServico.as_view()),
+    url(r'^servicos/update', UpdateServico.as_view()),
+    url(r'^servicos/delete/(\d+)$', DeleteServico.as_view()),
     url(r'^servicos/(\d+)$', GetServico.as_view()),
     url(r'^servicos/prestador/(\d+)$', ListServicosPorPrestador.as_view()),
-    url(r'^servicos/avaliacoes/(\d+)$', GetAvaliacoesServico.as_view()),
+    url(r'^usuarios/avaliacoes/(\d+)$', GetAvaliacoesUsuario.as_view()),
     url(r'^servicos/avaliacoes/criar', AddAvaliacao.as_view()),
+    url(r'^servicos/search', SearchUsuarios.as_view()),
     url(r'^usuarios/all', ListUsuarios.as_view()),
     url(r'^usuarios/(\d+)$', GetUsuario.as_view()),
     url(r'^usuarios/ativo', GetRequestUser.as_view()),
@@ -42,11 +48,17 @@ urlpatterns = [
     url(r'^subcategorias/(\d+)$', GetSubCategoria.as_view()),
     url(r'^solicitacoes/all', ListSolicitacoes.as_view()),
     url(r'^servicos/solicitacoes/criar', AddSolicitacao.as_view()),
+    url(r'^servicos/solicitacoes/atualizar', UpdateSolicitacao.as_view()),
     url(r'^servicos/solicitacoes/(\d+)$', GetSolicitacao.as_view()),
+    url(r'^servicos/solicitacoes/mensagens/(\d+)$', ListMensagens.as_view()),
+    url(r'^servicos/solicitacoes/mensagens/criar', AddMensagem.as_view()),
     url(r'^orcamentos/all', ListOrcamentos.as_view()),
     url(r'^orcamentos/(\d+)$', GetOrcamento.as_view()),
     url(r'^servicos/orcamento/criar', AddOrcamento.as_view()),
-     url(r'^servicos/orcamento/atualizar', UpdateOrcamento.as_view()),
+    url(r'^servicos/orcamento/atualizar', UpdateOrcamento.as_view()),
+    url(r'^notificacoes/count/', CountNotificacoes.as_view()),
+    url(r'^notificacoes/ler/(\d+)$', LerNotificacao.as_view()),
 
 
-]
+
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

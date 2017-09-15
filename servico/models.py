@@ -1,8 +1,11 @@
+
 from __future__ import unicode_literals
 
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.utils.timezone import now
+
+
 
 class UsuarioManager(BaseUserManager):
     def create_user(self, email, password=None):
@@ -29,6 +32,12 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 	email = models.EmailField(max_length=30, unique=True)
 	facebook_name = models.CharField(max_length=30)
 	facebook_ID = models.CharField(max_length=30)
+	imagem = models.ImageField(null=True, blank=True)
+	mediaAvaliacoes = models.IntegerField(default=0)
+	totalAvaliacoes = models.IntegerField(default=0)
+	nome_fantasia = models.CharField(max_length=30, default="")
+	descricao = models.TextField(default="")
+
 	#is_superuser = models.BooleanField(default=False)
 	USERNAME_FIELD = "email"
 
@@ -69,23 +78,22 @@ class SubCategoria(models.Model):
 class Servico(models.Model):
 	"""docstring for Servico"""
 	titulo = models.CharField(max_length=100)
-	usuario = models.ForeignKey(Usuario)
-	categoria =  models.ForeignKey(SubCategoria)
+	usuario = models.ForeignKey(Usuario, default=1)
+	categoria =  models.ForeignKey(Categoria)
 	descricao = models.TextField()
-	telefone = models.CharField(max_length=14)
-	celular = models.CharField(max_length=14)
-	valor = models.IntegerField(null=True)
-	imagem = models.FileField(null=True, blank=True)
-	mediaAvaliacoes = models.IntegerField(default=0)
-	totalAvaliacoes = models.IntegerField(default=0)
+	valor_minimo = models.IntegerField(null=True)
+	valor_maximo = models.IntegerField(null=True)
+	imagem = models.ImageField(null=True, blank=True)
 	patrocinado = models.BooleanField(default=False)
-
+	
 	def __str__(self):
 		return self.titulo
 
 		
 class Avaliacao(models.Model):
-	servico = models.ForeignKey(Servico)
+	
+	#servico = models.ForeignKey(Servico)
+	prestador = models.ForeignKey(Usuario, related_name="Prestador")
 	comentario = models.CharField(max_length=200)
 	avaliador = models.ForeignKey(Usuario)
 	nota = models.IntegerField()
@@ -96,38 +104,38 @@ class Avaliacao(models.Model):
 
 class Solicitacao(models.Model):
 	
-	data = models.DateTimeField(default=now)
+	data = models.DateTimeField(default=now, null=True)
 	descricao = models.CharField(max_length=1000, null=True)
 	servico = models.ManyToManyField(Servico)
-	data_inicio = models.DateTimeField(null=True)
-	data_fim = models.DateTimeField(null=True)
+	prestador = models.ForeignKey(Usuario, related_name="prestador")
 	usuario = models.ForeignKey(Usuario)
-	hora_inicio = models.IntegerField(default=8)
-	minutos_inicio = models.IntegerField(default=0)
-	hora_fim = models.IntegerField(default=18)
-	minutos_fim = models.IntegerField(default=0)
+	status = models.CharField(default="pendente", max_length=10)
+
+	def __str__(self):
+		return str(self.id)
 		
 class Orcamento(models.Model):
 	"""docstring for Orcamento"""
 	solicitacao = models.ForeignKey(Solicitacao)
-	valor = models.IntegerField(blank=True)
 	descricao = models.CharField(max_length=1000, default="", blank=True)
 	validade = models.DateTimeField(null=True)
 	#data e hora de atendimento
-	data_atendimento = models.DateTimeField(null=True)
-	hora_atendimento = models.IntegerField(default=8)
-	minutos_atendimento = models.IntegerField(default=0)
 	servicos_atendidos = models.ManyToManyField(Servico)
+	valor = models.IntegerField(default=0)
 	#status (cancelado, pedente, confirmado, concluido, avaliado)
 	status = models.CharField(max_length=10,default="pendente", choices=[['cancelado','Cancelado'],['pendente','Pendente'],['confirmado','Confirmado'], ['concluido','Concluido'], ['avaliado', 'Avaliado']])
 
-class Notificacao(object):
+class Notificacao(models.Model):
 	"""docstring for notificacao"""
-	tipo = models.CharField()
+	tipo = models.CharField(max_length=100)
+	solicitacao = models.ForeignKey(Solicitacao)
+	lida = models.BooleanField(default=False)
 		
 class Mensagem(models.Model):
 	"""docstring for mensagem"""
 	solicitacao = models.ForeignKey(Solicitacao)
 	usuario = models.ForeignKey(Usuario)
 	texto = models.CharField(max_length=350)
+	def __str__(self):
+		return self.texto
 	

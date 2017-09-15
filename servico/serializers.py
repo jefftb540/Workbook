@@ -1,5 +1,7 @@
+# -*- coding: utf-8 -*-
 from rest_framework import  serializers
-from models import Categoria, SubCategoria, Usuario, Servico, Orcamento, Solicitacao, Mensagem, Avaliacao
+from models import Notificacao, Categoria, SubCategoria, Usuario, Servico, Orcamento, Solicitacao, Mensagem, Avaliacao
+from drf_extra_fields.fields import Base64ImageField
 
 
 class CategoriaSerializer(serializers.ModelSerializer):
@@ -19,18 +21,19 @@ class UsuarioSerializer(serializers.ModelSerializer):
 		fields = '__all__'
 
 class ServicoSerializer(serializers.ModelSerializer):
-	"""titulo = serializers.CharField(max_length=100)
-	#usuario = serializers.ForeignKey(Usuario)
-	#categoria =  serializers.ForeignKey(categoria)
-	descricao = serializers.CharField()
-	telefone = serializers.CharField(max_length=14)
-	celular = serializers.CharField(max_length=14)
-	imagem = serializers.FileField()
-	mediaAvaliacoes = serializers.IntegerField()
-	totalAvaliacoes = serializers.IntegerField()
-	patrocinado = serializers.BooleanField()"""
-	usuario = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
-	categoria = serializers.StringRelatedField()
+
+	usuario = serializers.PrimaryKeyRelatedField(queryset=Categoria.objects.all)
+	categoria = serializers.PrimaryKeyRelatedField(queryset=Categoria.objects.all())
+	imagem = Base64ImageField()
+	class Meta(object):
+		model = Servico
+		fields = '__all__'
+
+class ServicoSerializerGet(serializers.ModelSerializer):
+
+	usuario = UsuarioSerializer(read_only=True)
+	categoria = CategoriaSerializer(read_only=True)
+	#imagem = Base64ImageField()
 	class Meta(object):
 		model = Servico
 		fields = '__all__'
@@ -38,33 +41,26 @@ class ServicoSerializer(serializers.ModelSerializer):
 
 class AvaliacaoSerializer(serializers.ModelSerializer):
 	avaliador = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
-	servico = serializers.PrimaryKeyRelatedField(queryset=Servico.objects.all())
+	prestador = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
+	#servico = serializers.PrimaryKeyRelatedField(queryset=Servico.objects.all())
 	class Meta:
-		depth = 1
 		model = Avaliacao
 		fields = '__all__'
 
-class OrcamentoSerializer(serializers.ModelSerializer):
-	solicitacao = serializers.PrimaryKeyRelatedField(queryset=Solicitacao.objects.all())
-	servicos_atendidos = serializers.PrimaryKeyRelatedField(many=True, queryset=Servico.objects.all())
-	data_atendimento = serializers.DateTimeField(format="%d/%m/%Y")
 
+class AvaliacaoSerializerGet(serializers.ModelSerializer):
+	avaliador = UsuarioSerializer()
+	prestador = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
+	#servico = serializers.PrimaryKeyRelatedField(queryset=Servico.objects.all())
 	class Meta:
-		model = Orcamento
-		fields = '__all__'
-
-class OrcamentoSerializerGet(serializers.ModelSerializer):
-	solicitacao = serializers.PrimaryKeyRelatedField(queryset=Solicitacao.objects.all())
-	servicos_atendidos = ServicoSerializer(many=True, read_only=True)
-	data_atendimento = serializers.DateTimeField(format="%d/%m/%Y", read_only=True)
-	
-	class Meta:
-		model = Orcamento
+		model = Avaliacao
 		fields = '__all__'
 
 class SolicitacaoSerializer(serializers.ModelSerializer):
 	usuario = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
+	prestador = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
 	servico = serializers.PrimaryKeyRelatedField(many=True, queryset=Servico.objects.all())
+	#data = serializers.DateTimeField(format="%d/%m/%Y")
 	
 	
 	class Meta:
@@ -72,19 +68,54 @@ class SolicitacaoSerializer(serializers.ModelSerializer):
 		fields = '__all__'
 
 class SolicitacaoSerializerGet(serializers.ModelSerializer):
-	usuario = serializers.StringRelatedField()
+	usuario = UsuarioSerializer(read_only=True)
+	prestador = UsuarioSerializer(read_only=True)
 	servico = ServicoSerializer(many=True, read_only=True)
-	data_inicio = serializers.DateTimeField(format="%d/%m/%Y")
-	data_fim = serializers.DateTimeField(format="%d/%m/%Y")
+	#data = serializers.DateTimeField(format="%d/%m/%Y", read_only=True)
 
 	class Meta:
 		model = Solicitacao
 		fields = '__all__'
 
 
-class MensagemSerializer(serializers.ModelSerializer):
-	usuario = serializers.StringRelatedField()
-	solicitacao = serializers.StringRelatedField()
+class OrcamentoSerializer(serializers.ModelSerializer):
+	solicitacao = serializers.PrimaryKeyRelatedField(queryset=Solicitacao.objects.all())
+	servicos_atendidos = serializers.PrimaryKeyRelatedField(many=True, queryset=Servico.objects.all())
+
+	class Meta:
+		model = Orcamento
+		fields = '__all__'
+
+class OrcamentoSerializerGet(serializers.ModelSerializer):
+	solicitacao = SolicitacaoSerializerGet(read_only=True)
+	servicos_atendidos = ServicoSerializer(many=True, read_only=True)
+	data_atendimento = serializers.DateTimeField(format="%d/%m/%Y", read_only=True)
+	
+	class Meta:
+		model = Orcamento
+		fields = '__all__'
+
+
+
+
+class MensagemSerializerGet(serializers.ModelSerializer):
+	usuario = UsuarioSerializer(read_only=True)
+	solicitacao = SolicitacaoSerializer(read_only=True)
 	class Meta:
 		model = Mensagem
+		fields = '__all__'
+
+class MensagemSerializer(serializers.ModelSerializer):
+	usuario = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
+	solicitacao = serializers.PrimaryKeyRelatedField(queryset=Solicitacao.objects.all())
+	class Meta:
+		model = Mensagem
+		fields = '__all__'
+
+class NotificacaoSerializer(serializers.ModelSerializer):
+	solicitacao = serializers.PrimaryKeyRelatedField(queryset=Solicitacao.objects.all())
+	
+	
+	class Meta:
+		model = Notificacao
 		fields = '__all__'
