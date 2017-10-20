@@ -7,17 +7,27 @@ from django.shortcuts import render
 from rest_framework.views import APIView
 # -*- coding: utf-8 -*-
 from rest_framework.response import Response
+from django.core import serializers as Serializers
 from django.db.models import Q
 from rest_framework import authentication, permissions
-from django.contrib.auth.views import login
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
+from django.contrib.auth.views import login, logout
 from . import models
 from . import serializers
 from models import Notificacao, Servico, Usuario, Avaliacao, Solicitacao, Orcamento, Categoria, SubCategoria, Mensagem
-from serializers import NotificacaoSerializer, ServicoSerializer, ServicoSerializerGet, UsuarioSerializer,CategoriaSerializer, AvaliacaoSerializer, AvaliacaoSerializerGet, SolicitacaoSerializer, SolicitacaoSerializerGet, OrcamentoSerializer, OrcamentoSerializerGet, MensagemSerializer, MensagemSerializerGet
+from serializers import NotificacaoSerializer, ServicoSerializer, ServicoSerializerGet, UsuarioSerializer, UserCreateSerializer,CategoriaSerializer, AvaliacaoSerializer, AvaliacaoSerializerGet, SolicitacaoSerializer, SolicitacaoSerializerGet, OrcamentoSerializer, OrcamentoSerializerGet, MensagemSerializer, MensagemSerializerGet, MensagemSerializerList
 from oauth2_provider.views.generic import ProtectedResourceView
 from django.forms.models import modelform_factory
 from django.http import HttpResponse
+from rest_framework.permissions import AllowAny
+from rest_framework.decorators import api_view, permission_classes
+from base64 import b64decode
+from django.core.files.base import ContentFile 
+from django.http import JsonResponse
 
+
+import uuid
 import sys
 reload(sys)
 sys.setdefaultencoding('utf-8')
@@ -26,19 +36,19 @@ class ApiEndpoint(ProtectedResourceView):
 	"""docstring for ApiEndpoint"""
 	def get(self, request, *args, **kwargs):
 		return HttpResponse("Protegido com OAuth2")
-		
+
 
 class SaveServico(APIView):
 	def post(self, request, format=None):
-		servico = ServicoSerializer(data=request.data)
+		instance = ServicoSerializer(data=request.data)
 		#print vars(request.POST.get(["nota"]))
-		if servico.is_valid():
+		if instance.is_valid():
 			print "válido"
-			ServicoSerializer.save(servico) 		
+			ServicoSerializer.save(instance) 		
 		else:
-			print servico.id
+			print instance.errors
 
-		return Response(servico.data)
+		return Response(instance.data)
 
 class UpdateServico(APIView):
 	
@@ -89,6 +99,28 @@ class GetServico(APIView):
 		
 		return Response(response.data)
 
+class AddUsuario(APIView):
+	permission_classes = []
+	def post(self, request, format=None):
+		instance = UserCreateSerializer(data=request.data)
+		resposta = ""
+		if instance.is_valid():
+			usuario = Usuario.objects.create_user(request.data.get('email'), request.data.get('password'))
+
+			usuario.nome = request.data.get('nome')
+			print request.data.get('imagem')
+			image_data = b64decode(request.data.get('imagem'))
+			image_name = str(uuid.uuid4())+".jpg"
+			usuario.imagem = ContentFile(image_data, image_name)
+			usuario.save()
+			resposta = "Cadastrado"
+			
+		else:
+			print instance.errors
+			resposta = "Não cadastrado"
+
+		return Response(resposta)
+
 
 class ListUsuarios(APIView):
 	#authentication_classes = (authentication.TokenAuthentication)
@@ -117,6 +149,7 @@ class GetUsuario(APIView):
 		usuario = Usuario.objects.get(pk=self.args[0])
 		response = UsuarioSerializer(usuario)
 		return Response(response.data)
+
 
 class GetAvaliacoesUsuario(APIView):
 	#authentication_classes = (authentication.TokenAuthentication)
@@ -203,7 +236,7 @@ class AddSolicitacao(APIView):
 class UpdateSolicitacao(APIView):
 	def post(self, request, format=None):
 		instance = Solicitacao.objects.get(pk=request.data.get('id'))
-		solicitacao = SolicitacaoSerializerGet(instance=instance, data=request.data)
+		solicitacao = SolicitacaoSerializerGet(instance=instance, data=request.data, partial=True)
 		print request.data
 		#print vars(request.POST.get(["nota"]))
 		if solicitacao.is_valid():
@@ -217,13 +250,22 @@ class UpdateSolicitacao(APIView):
 		return Response(solicitacao.data)
 
 
-class ListSolicitacoes(APIView):
+class ListSolicitacoesPendentes(APIView):
 	#authentication_classes = (authentication.TokenAuthentication)
 
 	def get(self, request, format=None):
 		solicitacoes = Solicitacao.objects.filter(servico__usuario = request.user, status = "pendente").order_by('-data')
 		response = SolicitacaoSerializerGet(solicitacoes, many=True)
 		return Response(response.data)
+
+class ListSolicitacoes(APIView):
+	#authentication_classes = (authentication.TokenAuthentication)
+
+	def get(self, request, format=None):
+		solicitacoes = Solicitacao.objects.filter(usuario = request.user).order_by('-data')
+		response = SolicitacaoSerializerGet(solicitacoes, many=True)
+		return Response(response.data)
+
 
 class GetSolicitacao(APIView):
 	#authentication_classes = (authentication.TokenAuthentication)
@@ -250,10 +292,19 @@ class UpdateOrcamento(APIView):
 class AddOrcamento(APIView):
 	def post(self, request, format=None):
 		orcamento = OrcamentoSerializer(data=request.data)
+		notificacao = {'tipo': "Solicitação respondida", 'solicitacao': request.data.get('solicitacao') }
+		print request.data.get('solicitacao')
+
 		#print vars(request.POST.get(["nota"]))
 		if orcamento.is_valid():
 			print "válido"
-			OrcamentoSerializer.save(orcamento) 		
+			OrcamentoSerializer.save(orcamento)
+			notificacaoInstance = NotificacaoSerializer(data=notificacao)
+			if notificacaoInstance.is_valid():
+				print "Notificação válida"
+				NotificacaoSerializer.save(notificacaoInstance)
+			else:
+				print "Notificação inválida"
 		else:
 			print orcamento.errors
 
@@ -264,7 +315,7 @@ class ListOrcamentos(APIView):
 	#authentication_classes = (authentication.TokenAuthentication)
 
 	def get(self, request, format=None):
-		orcamentos = Orcamento.objects.filter(solicitacao__servico__usuario = request.user)
+		orcamentos = Orcamento.objects.filter(solicitacao__prestador = request.user)
 		response = OrcamentoSerializerGet(orcamentos, many=True)
 		return Response(response.data)
 
@@ -273,6 +324,14 @@ class GetOrcamento(APIView):
 
 	def get(self, request, format=None):
 		orcamento = Orcamento.objects.get(pk=self.args[0])
+		response = OrcamentoSerializerGet(orcamento)
+		return Response(response.data)
+
+class GetOrcamentoPorSolicitacao(APIView):
+	#authentication_classes = (authentication.TokenAuthentication)
+
+	def get(self, request, format=None):
+		orcamento = Orcamento.objects.filter(solicitacao__id=self.args[0]).order_by('-id')[0]
 		response = OrcamentoSerializerGet(orcamento)
 		return Response(response.data)
 
@@ -307,10 +366,42 @@ class AddMensagem(APIView):
 
 class CountNotificacoes(APIView):
 	"""docstring for CountNotificacoes"""
+	def get(self, request, format=None):	
+		prestador = Notificacao.objects.filter(solicitacao__prestador=request.user.id, lida=False, tipo__icontains="Nova solicitacao").count()
+		usuario = Notificacao.objects.filter(solicitacao__usuario=request.user.id, lida=False, tipo__icontains="Solicitação respondida").count()
+		total = {'usuario':usuario, 'prestador':prestador}
+		#response = HttpResponse(total)
+		return JsonResponse(total)
+
+class CountMensagens(APIView):
+	"""docstring for CountNotificacoes"""
+	def get(self, request, format=None):	
+		total = Mensagem.objects.filter(Q(solicitacao__usuario=request.user.id, lida=False) & ~Q(usuario=request.user.id)| Q(solicitacao__prestador=request.user.id, lida=False) & ~Q(usuario=request.user.id)).values('solicitacao').distinct().count()
+		return HttpResponse(total)
+
+class ListMensagensNaoLidas(APIView):
+	"""docstring for CountNotificacoes"""
+	def get(self, request, format=None):	
+		qs = Mensagem.objects.filter(Q(solicitacao__usuario=request.user.id, lida=False) & ~Q(usuario=request.user.id)| Q(solicitacao__prestador=request.user.id, lida=False) & ~Q(usuario=request.user.id)).order_by('solicitacao').distinct()
+		anterior = -1
+		for registro in qs:
+			print registro.pk
+			if registro.solicitacao == anterior:
+				qs = qs.exclude(pk=registro.pk)
+			anterior = registro.solicitacao
+
+		mensagem = MensagemSerializerGet(list(qs), many=True)
+
+		return JsonResponse(mensagem.data, safe=False)
+		
+
+
+class LerMensagens(APIView):
+	"""docstring for CountNotificacoes"""
 	def get(self, request, format=None):
-		count = Notificacao.objects.filter(solicitacao__prestador=request.user.id, lida=False).count()
-		response = HttpResponse(count)
-		return response
+		Mensagem.objects.filter(Q(solicitacao__usuario=request.user.id, lida=False, solicitacao__id=self.args[0]) & ~Q(usuario=request.user.id)| Q(solicitacao__prestador=request.user.id, lida=False, solicitacao__id=self.args[0]) & ~Q(usuario=request.user.id)).update(**{'lida':'True'})
+		return HttpResponse({'Status':'Sucesso'})
+
 
 class LerNotificacao(APIView):
 	"""docstring for CountNotificacoes"""
@@ -322,6 +413,8 @@ class LerNotificacao(APIView):
 		
 
 		return HttpResponse({'Status':'Sucesso'})
+
+
 
 		
 """

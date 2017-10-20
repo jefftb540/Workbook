@@ -18,7 +18,7 @@ class UsuarioManager(BaseUserManager):
     def create_superuser(self, email, password):
        
         user = self.create_user(email, password=password)
-        user.is_superuser = True
+        #user.is_superuser = True
         user.save(using=self._db)
         return user
 
@@ -28,15 +28,17 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 	"""docstring for ClassName"""
 	objects = UsuarioManager()
 	
-	nome = models.CharField(max_length=30)
-	email = models.EmailField(max_length=30, unique=True)
-	facebook_name = models.CharField(max_length=30)
-	facebook_ID = models.CharField(max_length=30)
+	nome = models.CharField(max_length=50)
+	email = models.EmailField(max_length=40, unique=True)
+	facebook_name = models.CharField(max_length=30, default="")
+	facebook_ID = models.CharField(max_length=30, default="")
 	imagem = models.ImageField(null=True, blank=True)
 	mediaAvaliacoes = models.IntegerField(default=0)
 	totalAvaliacoes = models.IntegerField(default=0)
 	nome_fantasia = models.CharField(max_length=30, default="")
+	is_prestador = models.BooleanField(default=False, blank=True)
 	descricao = models.TextField(default="")
+
 
 	#is_superuser = models.BooleanField(default=False)
 	USERNAME_FIELD = "email"
@@ -59,6 +61,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 	def has_module_perms(self, app_label):
 		return True
 		
+	
 
 class Categoria(models.Model):
 	nome = models.CharField(max_length=60)
@@ -81,8 +84,8 @@ class Servico(models.Model):
 	usuario = models.ForeignKey(Usuario, default=1)
 	categoria =  models.ForeignKey(Categoria)
 	descricao = models.TextField()
-	valor_minimo = models.IntegerField(null=True)
-	valor_maximo = models.IntegerField(null=True)
+	valor_minimo = models.IntegerField(null=True, blank=True)
+	valor_maximo = models.IntegerField(null=True, blank=True)
 	imagem = models.ImageField(null=True, blank=True)
 	patrocinado = models.BooleanField(default=False)
 	
@@ -136,6 +139,7 @@ class Mensagem(models.Model):
 	solicitacao = models.ForeignKey(Solicitacao)
 	usuario = models.ForeignKey(Usuario)
 	texto = models.CharField(max_length=350)
+	lida = models.BooleanField(default=False)
 	def __str__(self):
 		return self.texto
 	

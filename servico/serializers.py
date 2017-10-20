@@ -16,13 +16,25 @@ class SubCategoriaSerializer(serializers.ModelSerializer):
 		fields = '__all__'
 
 class UsuarioSerializer(serializers.ModelSerializer):
+	imagem= Base64ImageField()
 	class Meta:
 		model = Usuario
 		fields = '__all__'
 
+class UserCreateSerializer(serializers.ModelSerializer):
+	imagem= Base64ImageField()
+	def create(self, validated_data):
+		instance = Usuario.objects.create_user(**validated_data)
+		return instance
+
+	class Meta:
+	    model = Usuario
+	    fields = '__all__'
+
+
 class ServicoSerializer(serializers.ModelSerializer):
 
-	usuario = serializers.PrimaryKeyRelatedField(queryset=Categoria.objects.all)
+	usuario = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
 	categoria = serializers.PrimaryKeyRelatedField(queryset=Categoria.objects.all())
 	imagem = Base64ImageField()
 	class Meta(object):
@@ -33,7 +45,7 @@ class ServicoSerializerGet(serializers.ModelSerializer):
 
 	usuario = UsuarioSerializer(read_only=True)
 	categoria = CategoriaSerializer(read_only=True)
-	#imagem = Base64ImageField()
+	imagem = Base64ImageField()
 	class Meta(object):
 		model = Servico
 		fields = '__all__'
@@ -104,6 +116,13 @@ class MensagemSerializerGet(serializers.ModelSerializer):
 	class Meta:
 		model = Mensagem
 		fields = '__all__'
+
+
+class MensagemSerializerList(serializers.ModelSerializer):
+	solicitacao = serializers.PrimaryKeyRelatedField(queryset=Solicitacao.objects.all())
+	class Meta:
+		model = Mensagem
+		fields = 'solicitacao',
 
 class MensagemSerializer(serializers.ModelSerializer):
 	usuario = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
