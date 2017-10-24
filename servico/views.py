@@ -105,15 +105,14 @@ class AddUsuario(APIView):
 		instance = UserCreateSerializer(data=request.data)
 		resposta = ""
 		if instance.is_valid():
-			usuario = Usuario.objects.create_user(request.data.get('email'), request.data.get('password'))
-
-			usuario.nome = request.data.get('nome')
-			print request.data.get('imagem')
-			image_data = b64decode(request.data.get('imagem'))
-			image_name = str(uuid.uuid4())+".jpg"
-			usuario.imagem = ContentFile(image_data, image_name)
-			usuario.save()
-			resposta = "Cadastrado"
+			instance2 = Usuario.objects.create_user(request.data.get('email'), request.data.get('password'))
+			usuario = UsuarioSerializer(instance=instance2, data=request.data, partial=True)
+			if usuario.is_valid():
+				UsuarioSerializer.save(usuario)
+				resposta = "Cadastrado"
+			else:
+				print usuario.errors
+				resposta = "Problema nas informações extras"
 
 		else:
 			print instance.errors
@@ -203,10 +202,6 @@ class GetSubCategoria(APIView):
 		subCategoria = SubCategoria.objects.get(pk=self.args[0])
 		response = SubCategoriaSerializer(subCategoria)
 		return Response(response.data)
-
-
-
-#aplicar a logica de negócios para pegar somente as solicitacoes para o prestador
 
 class AddSolicitacao(APIView):
 	def post(self, request, format=None):
