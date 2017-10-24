@@ -31,7 +31,7 @@ ALLOWED_HOSTS = ["10.0.0.104"]
 # Application deu9j5 finition
 
 INSTALLED_APPS = [
-    'django.contrib.admin', 
+    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -109,16 +109,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-REST_FRAMEWORK = { 
+REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'oauth2_provider.ext.rest_framework.OAuth2Authentication', 
-    ), 
+        'oauth2_provider.ext.rest_framework.OAuth2Authentication',
+    ),
 
     'DEFAULT_PERMISSION_CLASSES': (
         'oauth2_provider.ext.rest_framework.TokenHasReadWriteScope',
 
     )
-} 
+}
 AUTH_USER_MODEL = "servico.Usuario"
 CORS_ORIGIN_ALLOW_ALL = True
 APPEND_SLASH=False
@@ -152,5 +152,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
-MEDIA_ROOT = '/var/www/html/images'
+MEDIA_ROOT = '/home/jefftb540/Workbook/images/'
 MEDIA_URL = '/images/'
