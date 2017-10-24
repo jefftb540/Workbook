@@ -108,7 +108,7 @@ class AddUsuario(APIView):
 			usuario = Usuario.objects.create_user(request.data.get('email'), request.data.get('password'))
 
 			usuario.nome = request.data.get('nome')
-			print request.data.get('imagem')
+			#print request.data.get('imagem')
 			image_data = b64decode(request.data.get('imagem'))
 			image_name = str(uuid.uuid4())+".jpg"
 			usuario.imagem = ContentFile(image_data, image_name)
