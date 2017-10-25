@@ -22,10 +22,10 @@ class UsuarioSerializer(serializers.ModelSerializer):
 		fields = '__all__'
 
 class UsuarioSerializerNoPassword(serializers.ModelSerializer):
+    password = serializers.ReadOnlyField()
 	imagem= Base64ImageField()
 	class Meta:
 		model = Usuario
-		exclude = ('password',)
 
 class UserCreateSerializer(serializers.ModelSerializer):
 	imagem= Base64ImageField()
@@ -79,8 +79,8 @@ class SolicitacaoSerializer(serializers.ModelSerializer):
 	prestador = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
 	servico = serializers.PrimaryKeyRelatedField(many=True, queryset=Servico.objects.all())
 	#data = serializers.DateTimeField(format="%d/%m/%Y")
-	
-	
+
+
 	class Meta:
 		model = Solicitacao
 		fields = '__all__'
@@ -108,7 +108,7 @@ class OrcamentoSerializerGet(serializers.ModelSerializer):
 	solicitacao = SolicitacaoSerializerGet(read_only=True)
 	servicos_atendidos = ServicoSerializer(many=True, read_only=True)
 	data_atendimento = serializers.DateTimeField(format="%d/%m/%Y", read_only=True)
-	
+
 	class Meta:
 		model = Orcamento
 		fields = '__all__'
@@ -139,8 +139,8 @@ class MensagemSerializer(serializers.ModelSerializer):
 
 class NotificacaoSerializer(serializers.ModelSerializer):
 	solicitacao = serializers.PrimaryKeyRelatedField(queryset=Solicitacao.objects.all())
-	
-	
+
+
 	class Meta:
 		model = Notificacao
 		fields = '__all__'
