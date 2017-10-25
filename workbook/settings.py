@@ -152,9 +152,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
-<<<<<<< HEAD
 MEDIA_ROOT = '/home/jefftb540/Workbook/images/'
-=======
-MEDIA_ROOT = '/var/www/html/images'
->>>>>>> eae73c14175a8285db2b64c6c5516886ac0c7af0
+
 MEDIA_URL = '/images/'
