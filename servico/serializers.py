@@ -2,7 +2,7 @@
 from rest_framework import  serializers
 from models import Notificacao, Categoria, SubCategoria, Usuario, Servico, Orcamento, Solicitacao, Mensagem, Avaliacao
 from drf_extra_fields.fields import Base64ImageField
-
+from django.contrib.auth.hashers import make_password
 
 class CategoriaSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -21,11 +21,18 @@ class UsuarioSerializer(serializers.ModelSerializer):
 		model = Usuario
 		fields = '__all__'
 
+	def update(self, instance, validated_data):
+		instance.password = make_password(validated_data.get('password', instance.password))
+		instance.save()
+		return instance
+
+
 class UsuarioSerializerNoPassword(serializers.ModelSerializer):
+
 	imagem= Base64ImageField()
 	class Meta:
 		model = Usuario
-		exclude = ('password',)
+		
 
 class UserCreateSerializer(serializers.ModelSerializer):
 	imagem= Base64ImageField()
