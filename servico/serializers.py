@@ -30,9 +30,8 @@ class UsuarioSerializer(serializers.ModelSerializer):
 class UsuarioSerializerNoPassword(serializers.ModelSerializer):
 
     password = serializers.ReadOnlyField()
-
-	imagem= Base64ImageField()
-	class Meta:
+    imagem= Base64ImageField()
+    class Meta:
 
 		model = Usuario
 

@@ -102,21 +102,15 @@ class GetServico(APIView):
 class AddUsuario(APIView):
 	permission_classes = []
 	def post(self, request, format=None):
-		instance = UserCreateSerializer(data=request.data)
-		resposta = ""
-		if instance.is_valid():
-			instance2 = Usuario.objects.create_user(request.data.get('email'), request.data.get('password'))
-			usuario = UsuarioSerializer(instance=instance2, data=request.data, partial=True)
-			if usuario.is_valid():
-				UsuarioSerializer.save(usuario)
-				resposta = "Cadastrado"
-			else:
-				print usuario.errors
-				resposta = "Problema nas informações extras"
-
+		usu_ser = UsuarioSerializer(data=request.data)
+		if usu_ser.is_valid():
+			usuario = Usuario(**usu_ser.validated_data)
+			usuario.set_password(request.data.get('password'))
+			usuario.save()
+			resposta = "Cadastrado"
 		else:
-			print instance.errors
-			resposta = "Não cadastrado"
+			print usu_ser.errors
+			resposta = "Problema nas informações extras"
 
 		return Response(resposta)
 
