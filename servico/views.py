@@ -108,7 +108,7 @@ class AddUsuario(APIView):
 			instance2 = Usuario.objects.create_user(request.data.get('email'), request.data.get('password'))
 			usuario = UsuarioSerializerNoPassword(instance=instance2, data=request.data, partial=True)
 			if usuario.is_valid():
-				UsuarioSerializer.save(usuario)
+				UsuarioSerializerNoPassword.save(usuario)
 				resposta = "Cadastrado"
 			else:
 				print usuario.errors
