@@ -16,7 +16,7 @@ from django.contrib.auth.views import login, logout
 from . import models
 from . import serializers
 from models import Notificacao, Servico, Usuario, Avaliacao, Solicitacao, Orcamento, Categoria, SubCategoria, Mensagem
-from serializers import NotificacaoSerializer, ServicoSerializer, ServicoSerializerGet, UsuarioSerializer, UserCreateSerializer,CategoriaSerializer, AvaliacaoSerializer, AvaliacaoSerializerGet, SolicitacaoSerializer, SolicitacaoSerializerGet, OrcamentoSerializer, OrcamentoSerializerGet, MensagemSerializer, MensagemSerializerGet, MensagemSerializerList
+from serializers import NotificacaoSerializer, ServicoSerializer, ServicoSerializerGet, UsuarioSerializer, UsuarioSerializerNoPassword, UserCreateSerializer,CategoriaSerializer, AvaliacaoSerializer, AvaliacaoSerializerGet, SolicitacaoSerializer, SolicitacaoSerializerGet, OrcamentoSerializer, OrcamentoSerializerGet, MensagemSerializer, MensagemSerializerGet, MensagemSerializerList
 from oauth2_provider.views.generic import ProtectedResourceView
 from django.forms.models import modelform_factory
 from django.http import HttpResponse
@@ -106,7 +106,7 @@ class AddUsuario(APIView):
 		resposta = ""
 		if instance.is_valid():
 			instance2 = Usuario.objects.create_user(request.data.get('email'), request.data.get('password'))
-			usuario = UsuarioSerializer(instance=instance2, data=request.data, partial=True)
+			usuario = UsuarioSerializerNoPassword(instance=instance2, data=request.data, partial=True)
 			if usuario.is_valid():
 				UsuarioSerializer.save(usuario)
 				resposta = "Cadastrado"

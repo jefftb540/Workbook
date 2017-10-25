@@ -20,7 +20,13 @@ class UsuarioSerializer(serializers.ModelSerializer):
 	class Meta:
 		model = Usuario
 		fields = '__all__'
-		
+class UsuarioSerializer(serializers.ModelSerializer):
+	imagem= Base64ImageField()
+	class Meta:
+		model = Usuario
+		fields = '__all__'
+		exclude = ('password',)
+
 class UserCreateSerializer(serializers.ModelSerializer):
 	imagem= Base64ImageField()
 	def create(self, validated_data):
