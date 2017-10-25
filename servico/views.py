@@ -23,7 +23,7 @@ from django.http import HttpResponse
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import api_view, permission_classes
 from base64 import b64decode
-from django.core.files.base import ContentFile 
+from django.core.files.base import ContentFile
 from django.http import JsonResponse
 
 
@@ -44,14 +44,14 @@ class SaveServico(APIView):
 		#print vars(request.POST.get(["nota"]))
 		if instance.is_valid():
 			print "válido"
-			ServicoSerializer.save(instance) 		
+			ServicoSerializer.save(instance)
 		else:
 			print instance.errors
 
 		return Response(instance.data)
 
 class UpdateServico(APIView):
-	
+
 	def post(self, request, format=None):
 		instance = Servico.objects.get(pk=request.data.get('id'))
 		print instance
@@ -60,7 +60,7 @@ class UpdateServico(APIView):
 		#print vars(request.POST.get(["nota"]))
 		if servico.is_valid():
 			print "válido"
-			ServicoSerializerGet.save(servico) 		
+			ServicoSerializerGet.save(servico)
 		else:
 			print servico.errors
 
@@ -96,7 +96,7 @@ class GetServico(APIView):
 	def get(self, request, format=None):
 		servico = Servico.objects.get(pk=self.args[0])
 		response = ServicoSerializerGet(servico)
-		
+
 		return Response(response.data)
 
 class AddUsuario(APIView):
@@ -113,7 +113,7 @@ class AddUsuario(APIView):
 			else:
 				print usuario.errors
 				resposta = "Problema nas informações extras"
-			
+
 		else:
 			print instance.errors
 			resposta = "Não cadastrado"
@@ -128,7 +128,7 @@ class ListUsuarios(APIView):
 		usuarios = Usuario.objects.all()
 		response = UsuarioSerializer(usuarios, many=True)
 		return Response(response.data)
-		
+
 class SearchUsuarios(APIView):
 	#authentication_classes = (authentication.TokenAuthentication)
 	def post(self, request, format=None):
@@ -140,7 +140,7 @@ class GetRequestUser(APIView):
 	"""docstring for GetRequestUser"""
 	def get(self, request, format=None):
 		return Response(UsuarioSerializer(request.user).data)
-		
+
 class GetUsuario(APIView):
 	#authentication_classes = (authentication.TokenAuthentication)
 
@@ -164,7 +164,7 @@ class AddAvaliacao(APIView):
 		#print vars(request.POST.get(["nota"]))
 		if instance.is_valid():
 			print "válido"
-			AvaliacaoSerializer.save(instance) 		
+			AvaliacaoSerializer.save(instance)
 		else:
 			print "invalido"
 
@@ -278,7 +278,7 @@ class UpdateOrcamento(APIView):
 		#print vars(request.POST.get(["nota"]))
 		if orcamento.is_valid():
 			print "válido"
-			OrcamentoSerializerGet.save(orcamento) 		
+			OrcamentoSerializerGet.save(orcamento)
 		else:
 			print orcamento.errors
 
@@ -351,7 +351,7 @@ class AddMensagem(APIView):
 		#print vars(request.POST.get(["nota"]))
 		if instance.is_valid():
 			print "válido"
-			MensagemSerializer.save(instance) 		
+			MensagemSerializer.save(instance)
 		else:
 			print "invalido\n"
 			print instance.errors
@@ -361,7 +361,7 @@ class AddMensagem(APIView):
 
 class CountNotificacoes(APIView):
 	"""docstring for CountNotificacoes"""
-	def get(self, request, format=None):	
+	def get(self, request, format=None):
 		prestador = Notificacao.objects.filter(solicitacao__prestador=request.user.id, lida=False, tipo__icontains="Nova solicitacao").count()
 		usuario = Notificacao.objects.filter(solicitacao__usuario=request.user.id, lida=False, tipo__icontains="Solicitação respondida").count()
 		total = {'usuario':usuario, 'prestador':prestador}
@@ -370,13 +370,13 @@ class CountNotificacoes(APIView):
 
 class CountMensagens(APIView):
 	"""docstring for CountNotificacoes"""
-	def get(self, request, format=None):	
+	def get(self, request, format=None):
 		total = Mensagem.objects.filter(Q(solicitacao__usuario=request.user.id, lida=False) & ~Q(usuario=request.user.id)| Q(solicitacao__prestador=request.user.id, lida=False) & ~Q(usuario=request.user.id)).values('solicitacao').distinct().count()
 		return HttpResponse(total)
 
 class ListMensagensNaoLidas(APIView):
 	"""docstring for CountNotificacoes"""
-	def get(self, request, format=None):	
+	def get(self, request, format=None):
 		qs = Mensagem.objects.filter(Q(solicitacao__usuario=request.user.id, lida=False) & ~Q(usuario=request.user.id)| Q(solicitacao__prestador=request.user.id, lida=False) & ~Q(usuario=request.user.id)).order_by('solicitacao').distinct()
 		anterior = -1
 		for registro in qs:
@@ -388,7 +388,7 @@ class ListMensagensNaoLidas(APIView):
 		mensagem = MensagemSerializerGet(list(qs), many=True)
 
 		return JsonResponse(mensagem.data, safe=False)
-		
+
 
 
 class LerMensagens(APIView):
@@ -402,16 +402,16 @@ class LerNotificacao(APIView):
 	"""docstring for CountNotificacoes"""
 	def get(self, request, format=None):
 		instance = Notificacao.objects.filter(Q(solicitacao__prestador=request.user.id, solicitacao=self.args[0], lida=False)|Q(solicitacao__usuario=request.user.id, solicitacao=self.args[0], lida=False))[0]
-		
+
 		instance.lida = True
 		instance.save()
-		
+
 
 		return HttpResponse({'Status':'Sucesso'})
 
 
 
-		
+
 """
 class GetSubCategoria(APIView):
 	#authentication_classes = (authentication.TokenAuthentication)
