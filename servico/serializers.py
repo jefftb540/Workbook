@@ -2,7 +2,7 @@
 from rest_framework import  serializers
 from models import Notificacao, Categoria, SubCategoria, Usuario, Servico, Orcamento, Solicitacao, Mensagem, Avaliacao
 from drf_extra_fields.fields import Base64ImageField
-
+from django.contrib.auth.hashers import make_password
 
 class CategoriaSerializer(serializers.ModelSerializer):
 	class Meta:
@@ -21,11 +21,18 @@ class UsuarioSerializer(serializers.ModelSerializer):
 		model = Usuario
 		fields = '__all__'
 
+	def update(self, instance, validated_data):
+		instance.password = make_password(validated_data.get('password', instance.password))
+		instance.save()
+		return instance
+
+
 class UsuarioSerializerNoPassword(serializers.ModelSerializer):
-	imagem= Base64ImageField()
-	class Meta:
+
+    password = serializers.ReadOnlyField()
+    imagem= Base64ImageField()
+    class Meta:
 		model = Usuario
-		exclude = ('password',)
 
 class UserCreateSerializer(serializers.ModelSerializer):
 	imagem= Base64ImageField()
@@ -79,8 +86,8 @@ class SolicitacaoSerializer(serializers.ModelSerializer):
 	prestador = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
 	servico = serializers.PrimaryKeyRelatedField(many=True, queryset=Servico.objects.all())
 	#data = serializers.DateTimeField(format="%d/%m/%Y")
-	
-	
+
+
 	class Meta:
 		model = Solicitacao
 		fields = '__all__'
@@ -108,7 +115,7 @@ class OrcamentoSerializerGet(serializers.ModelSerializer):
 	solicitacao = SolicitacaoSerializerGet(read_only=True)
 	servicos_atendidos = ServicoSerializer(many=True, read_only=True)
 	data_atendimento = serializers.DateTimeField(format="%d/%m/%Y", read_only=True)
-	
+
 	class Meta:
 		model = Orcamento
 		fields = '__all__'
@@ -139,8 +146,8 @@ class MensagemSerializer(serializers.ModelSerializer):
 
 class NotificacaoSerializer(serializers.ModelSerializer):
 	solicitacao = serializers.PrimaryKeyRelatedField(queryset=Solicitacao.objects.all())
-	
-	
+
+
 	class Meta:
 		model = Notificacao
 		fields = '__all__'
