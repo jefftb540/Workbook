@@ -25,7 +25,6 @@ class UsuarioSerializerNoPassword(serializers.ModelSerializer):
 	imagem= Base64ImageField()
 	class Meta:
 		model = Usuario
-		fields = '__all__'
 		exclude = ('password',)
 
 class UserCreateSerializer(serializers.ModelSerializer):
