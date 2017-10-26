@@ -18,7 +18,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 from rest_framework import routers
 from django.contrib import admin
-from servico.views import CountNotificacoes, CountMensagens, LerNotificacao, LerMensagens, ListMensagensNaoLidas, SaveServico, UpdateServico, DeleteServico, ListServicos, ListServicosPorPrestador, GetServico,AddUsuario, ListUsuarios, SearchUsuarios, GetUsuario, GetRequestUser, ListCategorias, GetCategoria, ListSubCategorias, GetSubCategoria, ListSolicitacoes, ListSolicitacoesPendentes, GetSolicitacao, AddSolicitacao, UpdateSolicitacao, AddOrcamento, UpdateOrcamento,ListOrcamentos, GetOrcamento, GetOrcamentoPorSolicitacao, GetAvaliacoesUsuario, AddAvaliacao, login, logout, AddMensagem, ListMensagens
+from servico.views import CountNotificacoes, CountMensagens, LerNotificacao, LerMensagens, ListMensagensNaoLidas, SaveServico, UpdateServico, DeleteServico, ListServicos, ListServicosPorPrestador, GetServico,AddUsuario, UpdateUsuario, ListUsuarios, SearchUsuarios, GetUsuario, GetRequestUser, ListCategorias, GetCategoria, ListSubCategorias, GetSubCategoria, ListSolicitacoes, ListSolicitacoesPendentes, GetSolicitacao, AddSolicitacao, UpdateSolicitacao, AddOrcamento, UpdateOrcamento,ListOrcamentos, GetOrcamento, GetOrcamentoPorSolicitacao, GetAvaliacoesUsuario, AddAvaliacao, login, logout, AddMensagem, ListMensagens
 
 router = routers.SimpleRouter()
 
@@ -42,6 +42,7 @@ urlpatterns = [
     url(r'^servicos/search', SearchUsuarios.as_view()),
     url(r'^usuarios/all', ListUsuarios.as_view()),
     url(r'^usuarios/criar', AddUsuario.as_view()),
+    url(r'^usuarios/update', UpdateUsuario.as_view()),
     url(r'^usuarios/(\d+)$', GetUsuario.as_view()),
     url(r'^usuarios/ativo', GetRequestUser.as_view()),
     url(r'^categorias/all', ListCategorias.as_view()),

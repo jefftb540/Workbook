@@ -32,8 +32,8 @@ class UsuarioSerializerNoPassword(serializers.ModelSerializer):
     password = serializers.ReadOnlyField()
     imagem= Base64ImageField()
     class Meta:
-
 		model = Usuario
+		fields = '__all__'
 
 class UserCreateSerializer(serializers.ModelSerializer):
 	imagem= Base64ImageField()

@@ -114,6 +114,19 @@ class AddUsuario(APIView):
 
 		return Response(resposta)
 
+class UpdateUsuario(APIView):
+	def post(self, request, format=None):
+		instance = Usuario.objects.get(pk=request.user.id)
+		usuario = UsuarioSerializerNoPassword(instance=instance, data=request.data, partial=True)
+		print instance
+		#print vars(request.POST.get(["nota"]))
+		if usuario.is_valid():
+			print "válido"
+			UsuarioSerializerNoPassword.save(usuario)
+		else:
+			print usuario.errors
+
+		return Response(usuario.data)
 
 class ListUsuarios(APIView):
 	#authentication_classes = (authentication.TokenAuthentication)
