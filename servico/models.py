@@ -37,6 +37,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
 	totalAvaliacoes = models.IntegerField(default=0)
 	nome_fantasia = models.CharField(max_length=30, default="")
 	is_prestador = models.BooleanField(default=False, blank=True)
+	is_adm = models.BooleanField(default=False, blank=True)
 	descricao = models.TextField(default="")
 
 
@@ -92,6 +93,12 @@ class Servico(models.Model):
 	def __str__(self):
 		return self.titulo
 
+class Requisicao(models.Model):
+	servico = models.ForeignKey(Servico)
+	status = models.CharField(max_length=10, default="pendente", choices=[['negado','Negado'], ['pendente', 'Pendente'], ['confirmado','Confirmado']])
+
+	def __str__(self):
+		return self.servico.titulo
 		
 class Avaliacao(models.Model):
 	

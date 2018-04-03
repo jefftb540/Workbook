@@ -15,8 +15,8 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.views import login, logout
 from . import models
 from . import serializers
-from models import Notificacao, Servico, Usuario, Avaliacao, Solicitacao, Orcamento, Categoria, SubCategoria, Mensagem
-from serializers import NotificacaoSerializer, ServicoSerializer, ServicoSerializerGet, UsuarioSerializer, UsuarioSerializerNoPassword, UserCreateSerializer,CategoriaSerializer, AvaliacaoSerializer, AvaliacaoSerializerGet, SolicitacaoSerializer, SolicitacaoSerializerGet, OrcamentoSerializer, OrcamentoSerializerGet, MensagemSerializer, MensagemSerializerGet, MensagemSerializerList
+from models import Notificacao, Servico, Requisicao, Usuario, Avaliacao, Solicitacao, Orcamento, Categoria, SubCategoria, Mensagem
+from serializers import NotificacaoSerializer, ServicoSerializer, ServicoSerializerGet, RequisicaoSerializerGet,UsuarioSerializer, UsuarioSerializerNoPassword, UserCreateSerializer,CategoriaSerializer, AvaliacaoSerializer, AvaliacaoSerializerGet, SolicitacaoSerializer, SolicitacaoSerializerGet, OrcamentoSerializer, OrcamentoSerializerGet, MensagemSerializer, MensagemSerializerGet, MensagemSerializerList, RequisicaoSerializer
 from oauth2_provider.views.generic import ProtectedResourceView
 from django.forms.models import modelform_factory
 from django.http import HttpResponse
@@ -74,6 +74,14 @@ class ListServicos(APIView):
 		response = ServicoSerializer(servicos, many=True)
 		return Response(response.data)
 
+class ListServicosPatrocinados(APIView):
+	#authentication_classes = (authentication.TokenAuthentication)
+
+	def get(self, request, format=None):
+		servicos = Servico.objects.filter(patrocinado=True)
+		response = ServicoSerializerGet(servicos, many=True)
+		return Response(response.data)
+
 class DeleteServico(APIView):
 	#authentication_classes = (authentication.TokenAuthentication)
 
@@ -98,6 +106,43 @@ class GetServico(APIView):
 		response = ServicoSerializerGet(servico)
 
 		return Response(response.data)
+
+class ListRequisicoes(APIView):
+	#authentication_classes = (authentication.TokenAuthentication)
+	def get(self, request, format=None):
+		requisicoes = Requisicao.objects.filter(status="pendente")
+		response = RequisicaoSerializerGet(requisicoes, many=True)
+		return Response(response.data)
+
+class AddRequisicao(APIView):
+	"""docstring for AddRequisicao"""
+	def post(self, request, format=None):
+		requisicao = RequisicaoSerializer(data=request.data)
+		if requisicao.is_valid():
+			RequisicaoSerializer.save(requisicao)
+		else:
+			print requisicao.errors
+
+		return Response(requisicao.data)
+
+	def put(self, request, format=None):
+		instance = Requisicao.objects.get(pk=request.data.get("id"))
+		requisicao = RequisicaoSerializer(instance=instance, data=request.data, partial=True)
+		if requisicao.is_valid():
+			RequisicaoSerializer.save(requisicao)
+			if request.data.get("status")== "confirmado":
+				servico = Servico.objects.get(pk=request.data.get("servico"))
+				servico.patrocinado = True
+				servico.save()
+				#servico = ServicoSerializerGet(instance=instance2, data=servico_partial, partial=True)
+				#if servico.is_valid():
+				#	print servico
+				#	ServicoSerializerGet.save(servico)
+					
+		else:
+			print requisicao.errors
+
+		return Response(requisicao.data)
 
 class AddUsuario(APIView):
 	permission_classes = []
@@ -139,7 +184,7 @@ class ListUsuarios(APIView):
 class SearchUsuarios(APIView):
 	#authentication_classes = (authentication.TokenAuthentication)
 	def post(self, request, format=None):
-		servicos = Servico.objects.filter(Q(descricao__icontains=request.data.get("query"))|Q(titulo__icontains=request.data.get("query")))
+		servicos = Servico.objects.filter(Q(descricao__icontains=request.data.get("query"))|Q(titulo__icontains=request.data.get("query"))).order_by("-patrocinado", "-usuario__mediaAvaliacoes", "-usuario__totalAvaliacoes")
 		response = ServicoSerializerGet(servicos, many=True)
 		return Response(response.data)
 
@@ -322,16 +367,13 @@ class ListOrcamentos(APIView):
 		return Response(response.data)
 
 class GetOrcamento(APIView):
-	#authentication_classes = (authentication.TokenAuthentication)
-
 	def get(self, request, format=None):
 		orcamento = Orcamento.objects.get(pk=self.args[0])
 		response = OrcamentoSerializerGet(orcamento)
 		return Response(response.data)
 
-class GetOrcamentoPorSolicitacao(APIView):
-	#authentication_classes = (authentication.TokenAuthentication)
 
+class GetOrcamentoPorSolicitacao(APIView):
 	def get(self, request, format=None):
 		orcamento = Orcamento.objects.filter(solicitacao__id=self.args[0]).order_by('-id')[0]
 		response = OrcamentoSerializerGet(orcamento)
@@ -355,14 +397,10 @@ class ListMensagens(APIView):
 class AddMensagem(APIView):
 	def post(self, request, format=None):
 		instance = MensagemSerializer(data=request.data)
-		#print vars(request.POST.get(["nota"]))
 		if instance.is_valid():
-			print "válido"
 			MensagemSerializer.save(instance)
 		else:
-			print "invalido\n"
 			print instance.errors
-
 		return Response(instance.data)
 
 

@@ -18,7 +18,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 from rest_framework import routers
 from django.contrib import admin
-from servico.views import CountNotificacoes, CountMensagens, LerNotificacao, LerMensagens, ListMensagensNaoLidas, SaveServico, UpdateServico, DeleteServico, ListServicos, ListServicosPorPrestador, GetServico,AddUsuario, UpdateUsuario, ListUsuarios, SearchUsuarios, GetUsuario, GetRequestUser, ListCategorias, GetCategoria, ListSubCategorias, GetSubCategoria, ListSolicitacoes, ListSolicitacoesPendentes, GetSolicitacao, AddSolicitacao, UpdateSolicitacao, AddOrcamento, UpdateOrcamento,ListOrcamentos, GetOrcamento, GetOrcamentoPorSolicitacao, GetAvaliacoesUsuario, AddAvaliacao, login, logout, AddMensagem, ListMensagens
+from servico.views import CountNotificacoes, CountMensagens, LerNotificacao, LerMensagens, ListMensagensNaoLidas, SaveServico, UpdateServico, DeleteServico, ListServicos, ListServicosPatrocinados, ListServicosPorPrestador, GetServico, AddUsuario, UpdateUsuario, ListUsuarios, SearchUsuarios, GetUsuario, GetRequestUser, ListCategorias, GetCategoria, ListSubCategorias, GetSubCategoria, ListSolicitacoes, ListSolicitacoesPendentes, GetSolicitacao, AddSolicitacao, UpdateSolicitacao, AddOrcamento, UpdateOrcamento,ListOrcamentos, GetOrcamento, GetOrcamentoPorSolicitacao, GetAvaliacoesUsuario, AddAvaliacao, login, logout, AddMensagem, ListMensagens, AddRequisicao, ListRequisicoes
 
 router = routers.SimpleRouter()
 
@@ -32,6 +32,7 @@ urlpatterns = [
     url(r'^login', login),
     url(r'^logout', logout),
     url(r'^servicos/all', ListServicos.as_view()),
+    url(r'^servicos/patrocinados', ListServicosPatrocinados.as_view()),
     url(r'^servicos/save', SaveServico.as_view()),
     url(r'^servicos/update', UpdateServico.as_view()),
     url(r'^servicos/delete/(\d+)$', DeleteServico.as_view()),
@@ -66,6 +67,9 @@ urlpatterns = [
     url(r'^mensagens/ler/(\d+)$', LerMensagens.as_view()),
     url(r'^mensagens/naolidas', ListMensagensNaoLidas.as_view()),
     url(r'^notificacoes/ler/(\d+)$', LerNotificacao.as_view()),
+    url(r'^requisicoes/listar', ListRequisicoes.as_view()),
+    url(r'^requisicoes/', AddRequisicao.as_view()),
+
 
 
 

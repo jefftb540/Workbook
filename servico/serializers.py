@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from rest_framework import  serializers
-from models import Notificacao, Categoria, SubCategoria, Usuario, Servico, Orcamento, Solicitacao, Mensagem, Avaliacao
+from models import Notificacao, Categoria, SubCategoria, Usuario, Servico, Requisicao, Orcamento, Solicitacao, Mensagem, Avaliacao
 from drf_extra_fields.fields import Base64ImageField
 from django.contrib.auth.hashers import make_password
 
@@ -47,7 +47,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 
 class ServicoSerializer(serializers.ModelSerializer):
-
 	usuario = serializers.PrimaryKeyRelatedField(queryset=Usuario.objects.all())
 	categoria = serializers.PrimaryKeyRelatedField(queryset=Categoria.objects.all())
 	imagem = Base64ImageField()
@@ -62,6 +61,18 @@ class ServicoSerializerGet(serializers.ModelSerializer):
 	imagem = Base64ImageField()
 	class Meta(object):
 		model = Servico
+		fields = '__all__'
+
+class RequisicaoSerializerGet(serializers.ModelSerializer):
+	servico = ServicoSerializer(read_only=True)
+	class Meta(object):
+		model = Requisicao
+		fields = '__all__'
+
+class RequisicaoSerializer(serializers.ModelSerializer):
+	servico = serializers.PrimaryKeyRelatedField(queryset=Servico.objects.all())
+	class Meta(object):
+		model = Requisicao
 		fields = '__all__'
 
 
