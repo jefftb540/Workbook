@@ -301,7 +301,7 @@ class ListSolicitacoesPendentes(APIView):
 	#authentication_classes = (authentication.TokenAuthentication)
 
 	def get(self, request, format=None):
-		solicitacoes = Solicitacao.objects.filter(servico__usuario = request.user, status = "pendente").order_by('-data')
+		solicitacoes = Solicitacao.objects.filter(prestador = request.user, status = "pendente").order_by('-data')
 		response = SolicitacaoSerializerGet(solicitacoes, many=True)
 		return Response(response.data)
 
@@ -327,10 +327,18 @@ class UpdateOrcamento(APIView):
 		instance = Orcamento.objects.get(pk=request.data.get('id'))
 		orcamento = OrcamentoSerializerGet(instance=instance, data=request.data)
 		print instance
+		notificacao = {'tipo': "Orçamento aprovado", 'solicitacao': request.data.get('solicitacao', dict()).get('id')}
+		print notificacao
 		#print vars(request.POST.get(["nota"]))
 		if orcamento.is_valid():
 			print "válido"
 			OrcamentoSerializerGet.save(orcamento)
+			notificacaoInstance = NotificacaoSerializer(data=notificacao)
+			if notificacaoInstance.is_valid():
+				print "Notificação válida"
+				NotificacaoSerializer.save(notificacaoInstance)
+			else:
+				print "Notificação inválida"
 		else:
 			print orcamento.errors
 
